@@ -261,6 +261,128 @@ export class SlidingWindowRateLimiter extends BaseRateLimiter {
 }
 
 /**
+ * Leaky Bucket Rate Limiter
+ * Processes requests at a constant rate, queueing or rejecting excess
+ * 
+ * The bucket has a capacity and "leaks" at a constant rate.
+ * Requests fill the bucket; if bucket overflows, requests are rejected.
+ */
+export class LeakyBucketRateLimiter extends BaseRateLimiter {
+  #waterLevel = 0;
+  #lastLeak;
+  #leakTimer;
+
+  /**
+   * @param {Object} options
+   * @param {number} options.capacity - Maximum bucket capacity (requests)
+   * @param {number} options.leakRate - Requests processed per second
+   */
+  constructor(options = {}) {
+    super(options);
+    this.capacity = options.capacity ?? options.limit ?? 10;
+    this.leakRate = options.leakRate ?? 1; // requests per second
+    this.#lastLeak = Date.now();
+    
+    // Periodic leak timer
+    this.#leakTimer = setInterval(() => this.#leak(), 100);
+  }
+
+  /**
+   * Leak water from the bucket based on elapsed time
+   * @private
+   */
+  #leak() {
+    const now = Date.now();
+    const elapsed = (now - this.#lastLeak) / 1000; // Convert to seconds
+    const leakedAmount = elapsed * this.leakRate;
+    
+    const previousLevel = this.#waterLevel;
+    this.#waterLevel = Math.max(0, this.#waterLevel - leakedAmount);
+    this.#lastLeak = now;
+    
+    if (previousLevel > 0 && this.#waterLevel < previousLevel) {
+      this._emit('leak', { 
+        leaked: previousLevel - this.#waterLevel,
+        currentLevel: this.#waterLevel 
+      });
+    }
+  }
+
+  /**
+   * Try to add a request to the bucket
+   * @param {number} amount - Amount to add (default 1)
+   * @returns {boolean} True if request was accepted
+   */
+  tryAcquire(amount = 1) {
+    this.stats.totalRequests++;
+    this.#leak(); // Update water level first
+
+    if (this.#waterLevel + amount <= this.capacity) {
+      this.#waterLevel += amount;
+      this.stats.allowedRequests++;
+      this._emit('allowed', { 
+        waterLevel: this.#waterLevel,
+        capacity: this.capacity
+      });
+      return true;
+    }
+
+    this.stats.rejectedRequests++;
+    // Calculate when there will be room
+    const excessAmount = (this.#waterLevel + amount) - this.capacity;
+    const retryAfter = Math.ceil((excessAmount / this.leakRate) * 1000);
+    this._emit('rejected', { 
+      waterLevel: this.#waterLevel,
+      capacity: this.capacity,
+      retryAfter
+    });
+    return false;
+  }
+
+  /**
+   * Execute with rate limiting
+   * @template T
+   * @param {() => Promise<T>} fn
+   * @param {number} amount - Request weight
+   * @returns {Promise<T>}
+   */
+  async execute(fn, amount = 1) {
+    if (!this.tryAcquire(amount)) {
+      const excessAmount = (this.#waterLevel + amount) - this.capacity;
+      const retryAfter = Math.ceil((excessAmount / this.leakRate) * 1000);
+      throw new RateLimitError(
+        `${this.name}: Rate limit exceeded (bucket full)`,
+        retryAfter
+      );
+    }
+    return fn();
+  }
+
+  /**
+   * Get current water level
+   */
+  get waterLevel() {
+    this.#leak();
+    return this.#waterLevel;
+  }
+
+  /**
+   * Get available capacity
+   */
+  get available() {
+    this.#leak();
+    return this.capacity - this.#waterLevel;
+  }
+
+  /**
+   * Clean up timer
+   */
+  destroy() {
+    clearInterval(this.#leakTimer);
+  }
+}
+
+/**
  * Fixed Window Rate Limiter
  * Simple counter that resets at fixed intervals
  */
@@ -356,6 +478,8 @@ export const RateLimiterFactory = {
         return new SlidingWindowRateLimiter(options);
       case RateLimitAlgorithm.FIXED_WINDOW:
         return new FixedWindowRateLimiter(options);
+      case RateLimitAlgorithm.LEAKY_BUCKET:
+        return new LeakyBucketRateLimiter(options);
       default:
         return new SlidingWindowRateLimiter(options);
     }
@@ -381,6 +505,18 @@ export const RateLimiterFactory = {
       capacity: 10,
       refillRate: 1,
       name: 'UserActions',
+      ...overrides
+    });
+  },
+
+  /**
+   * Create rate limiter for steady throughput (leaky bucket)
+   */
+  forSteadyThroughput(overrides = {}) {
+    return new LeakyBucketRateLimiter({
+      capacity: 20,
+      leakRate: 5,
+      name: 'SteadyThroughput',
       ...overrides
     });
   }

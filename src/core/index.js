@@ -17,5 +17,6 @@ export {
   RateLimitError,
   TokenBucketRateLimiter,
   SlidingWindowRateLimiter,
-  FixedWindowRateLimiter
+  FixedWindowRateLimiter,
+  LeakyBucketRateLimiter
 } from './RateLimiter.js';
