@@ -1,0 +1,55 @@
+{
+  "name": "resilience-based-example",
+  "version": "2.0.0",
+  "description": "Node.js resilience patterns library with circuit breaker, retry, timeout, fallback, bulkhead, and rate limiting",
+  "main": "src/core/index.js",
+  "type": "module",
+  "exports": {
+    ".": "./src/core/index.js",
+    "./circuit-breaker": "./src/core/CircuitBreaker.js",
+    "./retry": "./src/core/RetryHandler.js",
+    "./timeout": "./src/core/Timeout.js",
+    "./fallback": "./src/core/Fallback.js",
+    "./bulkhead": "./src/core/Bulkhead.js",
+    "./rate-limiter": "./src/core/RateLimiter.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "test": "node --test tests/*.test.js",
+    "test:watch": "node --test --watch tests/*.test.js",
+    "test:coverage": "node --test --experimental-test-coverage tests/*.test.js",
+    "example:circuit-breaker": "node examples/circuit-breaker.js",
+    "example:retry": "node examples/retry-pattern.js",
+    "example:timeout": "node examples/timeout-pattern.js",
+    "example:fallback": "node examples/fallback-pattern.js",
+    "example:bulkhead": "node examples/bulkhead-pattern.js",
+    "example:rate-limiter": "node examples/rate-limiter-pattern.js",
+    "example:resilience-service": "node examples/resilience-service.js",
+    "lint": "echo 'Add eslint when ready'"
+  },
+  "keywords": [
+    "resilience",
+    "circuit-breaker",
+    "retry",
+    "timeout",
+    "fallback",
+    "bulkhead",
+    "rate-limiter",
+    "fault-tolerance",
+    "reliability",
+    "patterns"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "opossum": "^8.1.4",
+    "axios": "^1.6.2"
+  },
+  "files": [
+    "src/",
+    "README.md"
+  ]
+}
