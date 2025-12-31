@@ -11,7 +11,8 @@
     "./timeout": "./src/core/Timeout.js",
     "./fallback": "./src/core/Fallback.js",
     "./bulkhead": "./src/core/Bulkhead.js",
-    "./rate-limiter": "./src/core/RateLimiter.js"
+    "./rate-limiter": "./src/core/RateLimiter.js",
+    "./http-client": "./src/services/ResilientHttpClient.js"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -30,6 +31,7 @@
     "example:resilience-service": "node examples/resilience-service.js",
     "example:observable": "node examples/observable-resilience.js",
     "example:chaos": "node examples/chaos-testing.js",
+    "example:rest-api": "node examples/resilient-rest-api.js",
     "lint": "echo 'Add eslint when ready'"
   },
   "keywords": [

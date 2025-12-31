@@ -55,6 +55,14 @@ Enterprise pattern that composes multiple resilience strategies.
 - Health checks and monitoring
 - Production-ready implementation
 
+### 8. **Resilient HTTP Client** 🌐 `NEW`
+A production-ready REST API client with built-in resilience patterns.
+- All patterns integrated (Circuit Breaker, Retry, Timeout, Fallback, Bulkhead, Rate Limiter)
+- Fluent Builder API for easy configuration
+- Event-driven monitoring system
+- Comprehensive statistics collection
+- HTTP methods: GET, POST, PUT, PATCH, DELETE
+
 ## 📚 Documentation
 
 | Document | Description |
@@ -114,6 +122,9 @@ npm run example:observable
 
 # Chaos Engineering (Fault Injection Tests)
 npm run example:chaos
+
+# Resilient REST API Client (All Patterns in HTTP Client)
+npm run example:rest-api
 ```
 
 ### Running Tests
@@ -129,7 +140,7 @@ npm run test:coverage
 npm run test:watch
 ```
 
-**Test Results:** 128 tests passing with 95% code coverage
+**Test Results:** 175+ tests passing with 95% code coverage
 
 ## 📖 Code Examples
 
@@ -143,6 +154,12 @@ import {
   Bulkhead,
   TokenBucketRateLimiter
 } from 'resilience-based-example';
+
+// Or import the Resilient HTTP Client
+import { 
+  ResilientHttpClient, 
+  ResilientHttpClientBuilder 
+} from 'resilience-based-example/http-client';
 ```
 
 ### Circuit Breaker Example
@@ -215,6 +232,36 @@ const limiter = new TokenBucketRateLimiter({
 if (limiter.tryConsume()) {
   await handleRequest();
 }
+```
+
+### Resilient HTTP Client (All Patterns Combined)
+```javascript
+import { ResilientHttpClientBuilder } from 'resilience-based-example/http-client';
+
+const client = new ResilientHttpClientBuilder()
+  .baseUrl('https://api.example.com')
+  .headers({ 'Authorization': 'Bearer token' })
+  .withCircuitBreaker({ failureThreshold: 5, timeout: 30000 })
+  .withRetry({ maxAttempts: 3, baseDelay: 1000 })
+  .withTimeout({ duration: 5000 })
+  .withBulkhead({ maxConcurrent: 10, maxQueueSize: 50 })
+  .withRateLimiter({ limit: 100, windowMs: 60000 })
+  .build();
+
+// Make resilient API calls
+const users = await client.get('/users');
+
+// With fallback for graceful degradation
+const data = await client.get('/data', {
+  fallback: async () => ({ data: cachedData, fromCache: true })
+});
+
+// Monitor events
+client.on('circuitOpen', () => console.log('Circuit opened!'));
+client.on('retry', ({ attempt }) => console.log(`Retry attempt ${attempt}`));
+
+// Get comprehensive statistics
+console.log(client.getStats());
 ```
 
 ## 🔧 Configuration
@@ -296,21 +343,25 @@ This implementation has been validated against industry best practices:
 ```
 resilience-patterns-nodejs/
 ├── src/
-│   └── core/                          # Core library modules
-│       ├── CircuitBreaker.js          # Circuit breaker with state machine
-│       ├── RetryHandler.js            # Retry with multiple backoff strategies
-│       ├── Timeout.js                 # Timeout wrapper
-│       ├── Fallback.js                # Fallback with cascading support
-│       ├── Bulkhead.js                # Concurrency limiter with queue
-│       ├── RateLimiter.js             # Token bucket, sliding & fixed window
-│       └── index.js                   # Module exports
-├── tests/                             # Unit & integration tests (128 tests)
+│   ├── core/                          # Core library modules
+│   │   ├── CircuitBreaker.js          # Circuit breaker with state machine
+│   │   ├── RetryHandler.js            # Retry with multiple backoff strategies
+│   │   ├── Timeout.js                 # Timeout wrapper
+│   │   ├── Fallback.js                # Fallback with cascading support
+│   │   ├── Bulkhead.js                # Concurrency limiter with queue
+│   │   ├── RateLimiter.js             # Token bucket, sliding & fixed window
+│   │   └── index.js                   # Module exports
+│   └── services/                      # Production-ready services
+│       ├── ResilientHttpClient.js     # HTTP client with all patterns
+│       └── index.js                   # Service exports
+├── tests/                             # Unit & integration tests (175+ tests)
 │   ├── CircuitBreaker.test.js
 │   ├── RetryHandler.test.js
 │   ├── Timeout.test.js
 │   ├── Fallback.test.js
 │   ├── Bulkhead.test.js
 │   ├── RateLimiter.test.js
+│   ├── ResilientHttpClient.test.js    # HTTP client TDD tests
 │   └── integration.test.js
 ├── examples/                          # Usage examples
 │   ├── circuit-breaker.js
@@ -319,7 +370,8 @@ resilience-patterns-nodejs/
 │   ├── fallback-pattern.js
 │   ├── bulkhead-pattern.js
 │   ├── rate-limiter-pattern.js
-│   └── resilience-service.js
+│   ├── resilience-service.js
+│   └── resilient-rest-api.js          # HTTP client demo
 ├── docs/                              # Documentation
 │   ├── API.md                         # Complete API reference
 │   ├── PATTERNS.md                    # Pattern guide
