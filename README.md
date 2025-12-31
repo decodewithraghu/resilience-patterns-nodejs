@@ -2,7 +2,7 @@
 
 A comprehensive demonstration of resilience patterns in Node.js using the Opossum circuit breaker library and custom implementations.
 
-> ✅ **Industry Best Practices Validated** - See [BEST_PRACTICES_REVIEW.md](BEST_PRACTICES_REVIEW.md) for detailed compliance analysis
+> ✅ **Industry Best Practices Validated** - See [Best Practices Review](docs/BEST_PRACTICES_REVIEW.md) for detailed compliance analysis
 
 ## 🎯 What is Resilience?
 
@@ -68,7 +68,7 @@ Enterprise pattern that composes multiple resilience strategies.
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 16+ installed
+- Node.js 18+ installed
 - npm or yarn package manager
 
 ### Installation
@@ -110,62 +110,104 @@ npm run example:rate-limiter
 npm run example:resilience-service
 ```
 
+### Running Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run tests with coverage
+npm run test:coverage
+
+# Run tests in watch mode
+npm run test:watch
+```
+
+**Test Results:** 128 tests passing with 95% code coverage
+
 ## 📖 Code Examples
+
+### Using the Core Library
+```javascript
+import {
+  CircuitBreaker,
+  RetryHandler,
+  TimeoutHandler,
+  FallbackHandler,
+  Bulkhead,
+  TokenBucketRateLimiter
+} from 'resilience-based-example';
+```
 
 ### Circuit Breaker Example
 ```javascript
-import CircuitBreaker from 'opossum';
-
-const breaker = new CircuitBreaker(asyncFunction, {
-  timeout: 3000,
-  errorThresholdPercentage: 50,
-  resetTimeout: 5000
+const breaker = new CircuitBreaker({
+  failureThreshold: 5,
+  successThreshold: 2,
+  timeout: 30000
 });
 
-breaker.fire(params)
-  .then(result => console.log('Success:', result))
-  .catch(error => console.log('Failed:', error));
+breaker.on('open', () => console.log('Circuit opened!'));
+
+const result = await breaker.execute(async () => {
+  return await fetchData();
+});
 ```
 
 ### Retry with Exponential Backoff
 ```javascript
-async function retryWithBackoff(fn, maxRetries = 3, baseDelay = 1000) {
-  for (let attempt = 0; attempt < maxRetries; attempt++) {
-    try {
-      return await fn();
-    } catch (error) {
-      if (attempt < maxRetries - 1) {
-        const delay = baseDelay * Math.pow(2, attempt);
-        await new Promise(resolve => setTimeout(resolve, delay));
-      } else {
-        throw error;
-      }
-    }
-  }
-}
+const retry = new RetryHandler({
+  maxAttempts: 3,
+  baseDelay: 1000,
+  strategy: BackoffStrategy.EXPONENTIAL,
+  jitter: true
+});
+
+const result = await retry.execute(async () => {
+  return await unreliableOperation();
+});
 ```
 
 ### Timeout Pattern
 ```javascript
-function withTimeout(promise, timeoutMs) {
-  return Promise.race([
-    promise,
-    new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Timeout')), timeoutMs)
-    )
-  ]);
-}
+const timeout = new TimeoutHandler({ duration: 5000 });
+
+const result = await timeout.execute(async () => {
+  return await slowOperation();
+});
 ```
 
 ### Fallback Pattern
 ```javascript
-async function withFallback(primaryFn, fallbackFn) {
-  try {
-    return await primaryFn();
-  } catch (error) {
-    console.log('Primary failed, using fallback');
-    return await fallbackFn();
-  }
+const fallback = new FallbackHandler();
+
+const result = await fallback.execute(
+  async () => await primaryService.getData(),
+  async () => await cache.getCachedData()
+);
+```
+
+### Bulkhead Pattern
+```javascript
+const bulkhead = new Bulkhead({
+  maxConcurrent: 10,
+  maxQueueSize: 100
+});
+
+const result = await bulkhead.execute(async () => {
+  return await processRequest();
+});
+```
+
+### Rate Limiter Pattern
+```javascript
+const limiter = new TokenBucketRateLimiter({
+  capacity: 100,
+  refillRate: 10
+});
+
+if (limiter.tryConsume()) {
+  await handleRequest();
 }
 ```
 
@@ -231,7 +273,7 @@ This implementation has been validated against industry best practices:
 
 **Production Readiness**: 95% - Ready for production use
 
-📄 **See [BEST_PRACTICES_REVIEW.md](BEST_PRACTICES_REVIEW.md) for detailed compliance analysis**
+📄 **See [Best Practices Review](docs/BEST_PRACTICES_REVIEW.md) for detailed compliance analysis**
 
 ## 🤝 Best Practices
 
@@ -246,16 +288,38 @@ This implementation has been validated against industry best practices:
 ## 📁 Project Structure
 
 ```
-resillance-based-example/
-├── index.js                           # Main demo (all patterns)
-├── examples/
-│   ├── circuit-breaker.js            # Circuit breaker detailed example
-│   ├── retry-pattern.js              # Retry with exponential backoff
-│   ├── timeout-pattern.js            # Timeout pattern examples
-│   ├── fallback-pattern.js           # Fallback strategies
-│   ├── bulkhead-pattern.js           # Resource isolation & concurrency control
-│   ├── rate-limiter-pattern.js       # Rate limiting algorithms
-│   └── resilience-service.js         # Enterprise composition pattern
+resilience-patterns-nodejs/
+├── src/
+│   └── core/                          # Core library modules
+│       ├── CircuitBreaker.js          # Circuit breaker with state machine
+│       ├── RetryHandler.js            # Retry with multiple backoff strategies
+│       ├── Timeout.js                 # Timeout wrapper
+│       ├── Fallback.js                # Fallback with cascading support
+│       ├── Bulkhead.js                # Concurrency limiter with queue
+│       ├── RateLimiter.js             # Token bucket, sliding & fixed window
+│       └── index.js                   # Module exports
+├── tests/                             # Unit & integration tests (128 tests)
+│   ├── CircuitBreaker.test.js
+│   ├── RetryHandler.test.js
+│   ├── Timeout.test.js
+│   ├── Fallback.test.js
+│   ├── Bulkhead.test.js
+│   ├── RateLimiter.test.js
+│   └── integration.test.js
+├── examples/                          # Usage examples
+│   ├── circuit-breaker.js
+│   ├── retry-pattern.js
+│   ├── timeout-pattern.js
+│   ├── fallback-pattern.js
+│   ├── bulkhead-pattern.js
+│   ├── rate-limiter-pattern.js
+│   └── resilience-service.js
+├── docs/                              # Documentation
+│   ├── API.md                         # Complete API reference
+│   ├── PATTERNS.md                    # Pattern guide
+│   ├── BEST_PRACTICES_REVIEW.md
+│   └── QUICK_REFERENCE.md
+├── index.js                           # Main entry & demo
 ├── package.json
 └── README.md
 ```
@@ -279,7 +343,7 @@ resillance-based-example/
 
 ## 📝 License
 
-ISC
+MIT
 
 ## 🙏 Credits
 
