@@ -63,6 +63,7 @@ Enterprise pattern that composes multiple resilience strategies.
 | [Patterns Guide](docs/PATTERNS.md) | When & how to use each pattern |
 | [Best Practices](docs/BEST_PRACTICES_REVIEW.md) | Industry compliance analysis |
 | [Quick Reference](docs/QUICK_REFERENCE.md) | Developer quick reference guide |
+| [Advanced Topics](docs/ADVANCED_TOPICS.md) | Observability, chaos engineering, microservices |
 
 ## 🚀 Getting Started
 
@@ -107,6 +108,12 @@ npm run example:rate-limiter
 
 # Enterprise Resilience Service (All Patterns Combined)
 npm run example:resilience-service
+
+# Observable Resilience (Metrics, Tracing, Logging)
+npm run example:observable
+
+# Chaos Engineering (Fault Injection Tests)
+npm run example:chaos
 ```
 
 ### Running Tests

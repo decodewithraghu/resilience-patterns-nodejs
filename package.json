@@ -28,6 +28,8 @@
     "example:bulkhead": "node examples/bulkhead-pattern.js",
     "example:rate-limiter": "node examples/rate-limiter-pattern.js",
     "example:resilience-service": "node examples/resilience-service.js",
+    "example:observable": "node examples/observable-resilience.js",
+    "example:chaos": "node examples/chaos-testing.js",
     "lint": "echo 'Add eslint when ready'"
   },
   "keywords": [

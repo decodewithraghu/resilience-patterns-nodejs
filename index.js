@@ -155,6 +155,10 @@ export async function runDemo() {
   
   console.log('\n' + '='.repeat(60));
   console.log('✨ Demo complete! See examples/ folder for more use cases.\n');
+  
+  console.log('📚 Advanced Examples:');
+  console.log('   npm run example:observable  - Metrics, tracing & logging');
+  console.log('   npm run example:chaos       - Chaos engineering tests\n');
 }
 
 // Run demo if this is the main module
