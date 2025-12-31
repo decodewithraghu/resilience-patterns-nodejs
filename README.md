@@ -62,7 +62,6 @@ Enterprise pattern that composes multiple resilience strategies.
 | [API Reference](docs/API.md) | Complete API documentation |
 | [Patterns Guide](docs/PATTERNS.md) | When & how to use each pattern |
 | [Best Practices](docs/BEST_PRACTICES_REVIEW.md) | Industry compliance analysis |
-| [Validation Summary](docs/VALIDATION_SUMMARY.md) | What was validated and added |
 | [Quick Reference](docs/QUICK_REFERENCE.md) | Developer quick reference guide |
 
 ## 🚀 Getting Started
