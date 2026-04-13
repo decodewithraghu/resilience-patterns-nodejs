@@ -67,7 +67,7 @@ Enterprise pattern that composes multiple resilience strategies.
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 18+ installed
+- Node.js 24.12.0+ installed
 - npm or yarn package manager
 
 ### Installation
@@ -348,7 +348,7 @@ MIT
 
 Built with:
 - [Opossum](https://github.com/nodeshift/opossum) - Circuit breaker library
-- [Axios](https://axios-http.com/) - HTTP client (for examples)
+- Node.js built-in `fetch` (Node 24.12.0+) - HTTP client for examples
 
 ---
 
