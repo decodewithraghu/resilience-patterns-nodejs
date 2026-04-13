@@ -2,6 +2,8 @@
 
 This document explains each resilience pattern, when to use it, and real-world examples.
 
+> **Requirements:** Node.js 24.12.0+ — HTTP examples use the built-in `fetch` API (no Axios required)
+
 ## Overview
 
 | Pattern | Purpose | Use When |
