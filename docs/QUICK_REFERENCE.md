@@ -1,5 +1,7 @@
 # 🚀 Quick Reference Guide - Resilience Patterns
 
+> **Requirements:** Node.js 24.12.0+ — HTTP examples use the built-in `fetch` API
+
 ## Pattern Selection Matrix
 
 ### When to Use Which Pattern
