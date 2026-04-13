@@ -14,7 +14,7 @@
     "./rate-limiter": "./src/core/RateLimiter.js"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=24.12.0"
   },
   "scripts": {
     "start": "node index.js",
@@ -45,8 +45,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "opossum": "^8.1.4",
-    "axios": "^1.6.2"
+    "opossum": "^8.1.4"
   },
   "files": [
     "src/",
