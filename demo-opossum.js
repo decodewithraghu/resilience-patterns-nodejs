@@ -1,5 +1,4 @@
 import CircuitBreaker from 'opossum';
-import axios from 'axios';
 
 // ============================================
 // RESILIENCE PATTERNS DEMONSTRATION
@@ -174,13 +173,13 @@ async function demonstrateFallback() {
 async function demonstrateRealWorldExample() {
   console.log('\n🌐 Real-World Example: API Call with Circuit Breaker + Fallback...');
   
-  // Simulate API call with circuit breaker and fallback
+  // Real HTTP call using Node's built-in fetch (stable in Node 24.12.0+)
   async function fetchUserData(userId) {
-    // Simulating external API call
-    if (Math.random() > 0.5) {
-      throw new Error('API unavailable');
+    const response = await fetch(`https://jsonplaceholder.typicode.com/users/${userId}`);
+    if (!response.ok) {
+      throw new Error(`HTTP error: ${response.status}`);
     }
-    return { id: userId, name: 'John Doe', email: 'john@example.com' };
+    return response.json();
   }
   
   async function getCachedUserData(userId) {
@@ -188,21 +187,26 @@ async function demonstrateRealWorldExample() {
   }
   
   const userBreaker = new CircuitBreaker(fetchUserData, {
-    timeout: 2000,
+    timeout: 5000,
     errorThresholdPercentage: 50,
     resetTimeout: 3000,
+    volumeThreshold: 2,
     fallback: getCachedUserData
   });
-  
-  // Try fetching user data multiple times
-  for (let i = 0; i < 5; i++) {
+
+  userBreaker.on('fallback', (result) => {
+    console.log(`   🔀 Fallback used: ${JSON.stringify(result)}`);
+  });
+
+  // Try fetching user data for IDs 1-5 (valid jsonplaceholder IDs)
+  for (let i = 1; i <= 5; i++) {
     try {
-      const user = await userBreaker.fire(123);
-      console.log(`   ${i + 1}. User: ${user.name} ${user.cached ? '(from cache)' : '(from API)'}`);
+      const user = await userBreaker.fire(i);
+      console.log(`   ${i}. User: ${user.name} ${user.cached ? '(from cache)' : '(from API)'}`);
     } catch (error) {
-      console.log(`   ${i + 1}. ❌ Failed to get user data`);
+      console.log(`   ${i}. ❌ Failed to get user data: ${error.message}`);
     }
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(resolve, 300));
   }
 }
 
