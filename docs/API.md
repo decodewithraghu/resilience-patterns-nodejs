@@ -2,6 +2,8 @@
 
 Complete API documentation for the Resilience Patterns Library.
 
+> **Requirements:** Node.js 24.12.0+ — uses the built-in `fetch` API (no external HTTP client dependency)
+
 ## Table of Contents
 
 - [CircuitBreaker](#circuitbreaker)
