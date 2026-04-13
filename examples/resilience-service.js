@@ -26,6 +26,7 @@ class ResilienceService {
         timeout: options.circuitBreaker?.timeout || 3000,
         errorThresholdPercentage: options.circuitBreaker?.errorThresholdPercentage || 50,
         resetTimeout: options.circuitBreaker?.resetTimeout || 5000,
+        volumeThreshold: options.circuitBreaker?.volumeThreshold || 10,
       },
       // Retry
       retry: {
@@ -89,6 +90,7 @@ class ResilienceService {
         timeout: this.config.circuitBreaker.timeout,
         errorThresholdPercentage: this.config.circuitBreaker.errorThresholdPercentage,
         resetTimeout: this.config.circuitBreaker.resetTimeout,
+        volumeThreshold: this.config.circuitBreaker.volumeThreshold,
         name: this.serviceName,
       }
     );
@@ -412,10 +414,13 @@ async function scenario2() {
     serviceName: 'Data-Service',
     circuitBreaker: {
       enabled: true,
+      errorThresholdPercentage: 75, // Allow more failures before opening
+      resetTimeout: 5000,
+      volumeThreshold: 5, // Require at least 5 requests before opening
     },
     retry: {
       enabled: true,
-      maxAttempts: 2,
+      maxAttempts: 3,
     },
     timeout: {
       enabled: false, // No timeout needed
